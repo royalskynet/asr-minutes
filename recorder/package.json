@@ -1,0 +1,19 @@
+{
+  "name": "asr-minutes-recorder",
+  "version": "0.1.0",
+  "description": "免管理員截系統音訊 → 即時中文會議記錄 (Audio/系統音訊)",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "audio-notes": "./src/index.ts"
+  },
+  "scripts": {
+    "capture-test": "bun run src/capture/darwin.ts",
+    "start": "bun run src/index.ts",
+    "ui": "bun run src/server.ts"
+  },
+  "dependencies": {
+    "opencc-js": "^1.3.1",
+    "sherpa-onnx-node": "^1.13.2"
+  }
+}

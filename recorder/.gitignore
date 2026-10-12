@@ -1,0 +1,30 @@
+.DS_Store
+**/.DS_Store
+wiki/assets/*.png
+wiki/assets/*.pdf
+*.pyc
+graph.db
+
+# deps
+node_modules/
+
+# 編譯產物 / 第三方原始碼（用 setup 腳本重建）
+vendor/
+bin/audiotee
+bin/meeting-audio-watch
+
+# 打包產物（.app/zip，用 scripts/build-app.sh 重建）
+dist/
+
+# claude-mem 工作階段噪音
+AGENTS.md
+
+# 本地模型（~100MB+，用 setup 腳本下載）
+models/
+
+# 產出的會議記錄（含會議內容，絕不入庫）
+out/
+
+# 暫存
+*.pcm
+.gstack/

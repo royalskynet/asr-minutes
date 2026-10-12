@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleIdentifier</key>
+  <string>com.local.audiomeetingnotes</string>
+  <key>CFBundleName</key>
+  <string>AudioMeetingNotes</string>
+  <key>CFBundleDisplayName</key>
+  <string>Audio Meeting Notes</string>
+  <key>CFBundleExecutable</key>
+  <string>launcher</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+  <key>CFBundleVersion</key>
+  <string>1</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.3.0</string>
+  <key>LSMinimumSystemVersion</key>
+  <string>14.2</string>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+  <key>LSUIElement</key>
+  <false/>
+  <key>NSAudioCaptureUsageDescription</key>
+  <string>AudioMeetingNotes 需要存取系統音訊，以截取會議語音並進行本地離線語音轉文字。</string>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
+  <key>CFBundleIconFile</key>
+  <string>AppIcon</string>
+</dict>
+</plist>
