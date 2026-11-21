@@ -22,7 +22,7 @@ export const DEFAULT_SETTINGS: AutoRecordSettings = {
   keepAudio: false,
 };
 
-function sanitizeProvider(p: unknown): ProviderEntry | null {
+export function sanitizeProvider(p: unknown): ProviderEntry | null {
   if (!p || typeof p !== "object") return null;
   const o = p as Record<string, unknown>;
   if (!PROVIDER_TYPES.includes(o.type as ProviderType)) return null;
