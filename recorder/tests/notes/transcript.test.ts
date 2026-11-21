@@ -1,24 +1,43 @@
-import { afterEach, expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 
-// OUT_DIR 在模組載入時綁定 → 必須先設 env 再動態 import，避免測到真實 out/
-const dir = mkdtempSync(join(tmpdir(), "amn-trace-"));
-process.env.OUT_DIR = dir;
-const { Transcript } = await import("../../src/notes/transcript.ts");
+let dir: string;
+let Transcript: typeof import("../../src/notes/transcript.ts").Transcript;
+const pending = new Set<InstanceType<typeof Transcript>>();
+beforeEach(async () => {
+  dir = mkdtempSync(join(tmpdir(), "amn-trace-"));
+  const previous = process.env.OUT_DIR;
+  process.env.OUT_DIR = dir;
+  try {
+    ({ Transcript } = await import("../../src/notes/transcript.ts?fixture=" + basename(dir)));
+  } finally {
+    if (previous === undefined) delete process.env.OUT_DIR;
+    else process.env.OUT_DIR = previous;
+  }
+});
 
-afterEach(() => { rmSync(dir, { recursive: true }); });
+afterEach(async () => {
+  try {
+    for (const t of pending) await t.finish("");
+  } finally {
+    pending.clear();
+    rmSync(dir, { recursive: true });
+  }
+});
 
 // 每測試用唯一 dateStr，避免共用 OUT_DIR 下檔名相撞
 function newTranscript(tag: string) {
-  return new Transcript({
+  const t = new Transcript({
     source: "Audio / 系統音訊",
     engine: "test-engine",
     startMs: Date.now(),
     dateStr: "2026-08-13-" + tag,
     timeStr: "1200",
   });
+  pending.add(t);
+  return t;
 }
 
 test("replaceLines 覆寫逐字稿區並保留 frontmatter，finish 追加摘要", async () => {
@@ -37,6 +56,7 @@ test("replaceLines 覆寫逐字稿區並保留 frontmatter，finish 追加摘要
   expect(t.plainText()).not.toContain("即時稿第一句");
 
   await t.finish("## 重點摘要\n\n会议重點。\n");
+  pending.delete(t);
 
   const raw = readFileSync(t.path, "utf8");
   expect(raw).toContain("date: 2026-08-13-a");

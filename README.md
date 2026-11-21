@@ -20,6 +20,19 @@ git clone https://github.com/royalskynet/asr-minutes && cd asr-minutes/recorder 
 
 `setup.sh` 會編譯截音工具、下載本機 STT 模型（約 300MB），之後開 http://localhost:7321。
 
+### Network binding
+
+The recorder UI binds to `127.0.0.1:7321` by default. From `recorder/`, run
+`HOST=0.0.0.0 PORT=7321 bun run ui` only if you intentionally want network access.
+There is no authentication: anyone who can reach it can read transcripts, change
+settings and control recording. Use a trusted network/firewall; do not expose it publicly.
+
+### Tests
+
+From `recorder/`, run `bun install --frozen-lockfile && bun test`.
+The UI and non-capture tests work on Linux; model-backed tests automatically skip
+when the downloaded models are absent. Live capture and app packaging require macOS.
+
 ## 中文說明
 
 ### 會議紀要 skill（`SKILL.md`）

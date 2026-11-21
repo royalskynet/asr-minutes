@@ -7,7 +7,7 @@
 
 import { spawn, type ChildProcess, spawnSync } from "node:child_process";
 import { openPath } from "./platform.ts";
-import { readdirSync, readFileSync, writeFileSync, statSync, mkdirSync, existsSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync, statSync, mkdirSync, existsSync, chmodSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { basename, dirname, join } from "node:path";
 import { homedir } from "node:os";
@@ -16,7 +16,7 @@ import { retagFile } from "./notes/transcript.ts";
 import { readGlossary } from "./notes/clean.ts";
 import { complete, type ProviderEntry } from "./llm/router.ts";
 import { extractTranscript, getSummary, replaceSummary, editUtterance, toggleTodo, getContext, setContext, getTopic, setTopic, getDuration, nameStem } from "./notes/mdfile.ts";
-import { loadSettings, saveSettings } from "./auto-record/settings.ts";
+import { loadSettings, saveSettings, sanitizeProvider } from "./auto-record/settings.ts";
 import { createDetectionState, observeSample, suppressCurrentActivity, type RecorderOrigin } from "./auto-record/state.ts";
 import { startMeetingAudioWatcher, type WatcherHandle } from "./auto-record/watcher.ts";
 import { askToStartRecording } from "./auto-record/prompt.ts";
@@ -1013,6 +1013,7 @@ async function readBody(req: Request): Promise<any> {
 }
 
 Bun.serve({
+  hostname: process.env.HOST ?? "127.0.0.1",
   port: PORT,
   idleTimeout: 120,
   async fetch(req) {
@@ -1037,7 +1038,7 @@ Bun.serve({
         meetingDetectionMode: b.meetingDetectionMode === "prompt" ? "prompt" : "automatic",
         refineOn: typeof b.refineOn === "boolean" ? b.refineOn : settings.refineOn,
         keepAudio: typeof b.keepAudio === "boolean" ? b.keepAudio : settings.keepAudio,
-        ...(Array.isArray(b.providers) ? { providers: b.providers } : {}),
+        ...(Array.isArray(b.providers) ? { providers: b.providers.map(sanitizeProvider).filter((p): p is ProviderEntry => p !== null) } : {}),
       };
       saveSettings(SETTINGS_FILE, settings);
       if (wasEnabled && !settings.autoDetectMeeting) {
@@ -1075,8 +1076,9 @@ Bun.serve({
       const idx = lines.findIndex((l) => l.startsWith(`${varName}=`));
       const line = `${varName}=${key}`;
       if (idx >= 0) lines[idx] = line; else lines.push(line);
-      mkdirSync(dirname(envFile), { recursive: true });
-      writeFileSync(envFile, lines.join("\n") + "\n");
+      mkdirSync(dirname(envFile), { recursive: true, mode: 0o700 });
+      writeFileSync(envFile, lines.join("\n") + "\n", { mode: 0o600 });
+      chmodSync(envFile, 0o600);
       process.env[varName] = key; // 即時生效，免重啟
       return Response.json({ ok: true });
     }
